@@ -1,6 +1,7 @@
 package com.surcharges.model;
 
-import java.time.LocalDateTime;
+import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -9,18 +10,19 @@ import java.util.List;
  */
 public class Surcharge {
     private String id;
-    private LocalDateTime date;
+    private LocalDate date;
     private int stationId;
     private String kind;
     private int number;
     private int account;
-    private List<Payment> payments;
+    private BigDecimal sum;
+    private PaymentsList payments;
     private Refusing refusing;
     private String comment;
     private String period;
     private SurchargeStatus status;
 
-    public Surcharge(String id, LocalDateTime date, int stationId, String kind, int number, int account) {
+    public Surcharge(String id, LocalDate date, int stationId, String kind, int number, int account, double sum) {
         this.id = id;
         this.date = date;
         this.stationId = stationId;
@@ -28,16 +30,17 @@ public class Surcharge {
         this.number = number;
         this.account = account;
 
+        this.sum = BigDecimal.valueOf(sum);
         this.period = String.format("%d%d", date.getMonth().getValue(), date.getYear());
         this.status = SurchargeStatus.IN_ACTION;
-        payments = new ArrayList<>();
+        payments = new PaymentsList();
     }
 
     public String getId() {
         return id;
     }
 
-    public LocalDateTime getDate() {
+    public LocalDate getDate() {
         return date;
     }
 
@@ -55,10 +58,6 @@ public class Surcharge {
 
     public int getAccount() {
         return account;
-    }
-
-    public List<Payment> getPayments() {
-        return payments;
     }
 
     public Refusing getRefusing() {
@@ -85,9 +84,15 @@ public class Surcharge {
         this.account = account;
     }
 
-    public void addPayment(Payment payment) {
-        if (this.status == SurchargeStatus.IN_ACTION) {
-            this.payments.add(payment);
+    private BigDecimal getUnpayedSum(){
+        BigDecimal payed = payments.getTotal();
+        return this.sum.subtract(payed);
+    }
+
+    public void addPayment(LocalDate date, double sum) {
+        if ((this.status == SurchargeStatus.IN_ACTION)&&
+                (this.getUnpayedSum().compareTo(BigDecimal.valueOf(sum)))>=0) {
+            this.payments.addPayment(date, sum);
         }
     }
 
