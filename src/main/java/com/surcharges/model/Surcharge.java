@@ -6,6 +6,7 @@ import com.surcharges.model.nsi.SurchargeKind;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 /**
  * Начет. Содержит поля:
@@ -35,6 +36,12 @@ public class Surcharge {
     private SurchargeStatus status;
     private PaymentsList payments;
     private Denial denial;
+
+    /*
+    private User author;
+    private User editor;
+    private LocalDateTime editTime;
+    //*/
 
     public Surcharge(String id, LocalDate date, Station station, SurchargeKind kind, int number, Account account, double sum) {
         this.id = id;
