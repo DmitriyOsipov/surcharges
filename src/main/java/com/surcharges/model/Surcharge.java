@@ -115,4 +115,11 @@ public class Surcharge {
     public void setStatus(SurchargeStatus status) {
         this.status = status;
     }
+
+
+    public enum SurchargeStatus {
+        IN_ACTION,
+        PAYED,
+        REFUSED;
+    }
 }
