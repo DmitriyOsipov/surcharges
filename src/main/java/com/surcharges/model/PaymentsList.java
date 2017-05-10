@@ -8,10 +8,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Created by Dreamer on 09.05.2017.
+ * Список оплат по начету
  */
 public class PaymentsList {
-    List<Payment> payments;
+    private List<Payment> payments;
 
     public PaymentsList() {
         payments = new ArrayList<>();
@@ -32,6 +32,14 @@ public class PaymentsList {
 
     public void addPayment(LocalDate date, double sum, String documentKind, int documentNumber){
         this.payments.add(new Payment(date, sum, documentKind, documentNumber));
+    }
+
+    public Payment updatePayment(Payment oldPayment, Payment newPayment){
+        return this.payments.set(this.payments.indexOf(oldPayment), newPayment);
+    }
+
+    public boolean deletePayment(Payment payment){
+        return this.payments.remove(payment);
     }
 
 

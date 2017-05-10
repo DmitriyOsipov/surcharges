@@ -1,35 +1,51 @@
 package com.surcharges.model;
 
+import com.surcharges.model.nsi.Account;
+import com.surcharges.model.nsi.Station;
+import com.surcharges.model.nsi.SurchargeKind;
+
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
 /**
- * Created by Dreamer on 08.05.2017.
+ * Начет. Содержит поля:
+ *      ид
+ *      станция, по которой сформирован начет
+ *      дата начета
+ *      тип начета
+ *      номер начета
+ *      сумма начета
+ *      номер счета
+ *      комментарий (примечание)
+ *      период начета (месяц и год)
+ *      статус
+ *      список проплат
+ *      отказ
  */
 public class Surcharge {
     private String id;
+    private Station station;
     private LocalDate date;
-    private int stationId;
-    private String kind;
+    private SurchargeKind kind;
     private int number;
-    private int account;
     private BigDecimal sum;
-    private PaymentsList payments;
-    private Denial denial;
+    private Account account;
     private String comment;
     private String period;
     private SurchargeStatus status;
+    private PaymentsList payments;
+    private Denial denial;
 
-    public Surcharge(String id, LocalDate date, int stationId, String kind, int number, int account, double sum) {
+    public Surcharge(String id, LocalDate date, Station station, SurchargeKind kind, int number, Account account, double sum) {
         this.id = id;
         this.date = date;
-        this.stationId = stationId;
+        this.station = station;
         this.kind = kind;
         this.number = number;
         this.account = account;
 
         this.sum = BigDecimal.valueOf(sum);
-        this.period = String.format("%d%d", date.getMonth().getValue(), date.getYear());
+        this.period = String.format("%02d%d", date.getMonth().getValue(), date.getYear());
         this.status = SurchargeStatus.IN_ACTION;
         payments = new PaymentsList();
     }
@@ -42,11 +58,11 @@ public class Surcharge {
         return date;
     }
 
-    public int getStationId() {
-        return stationId;
+    public Station getStation() {
+        return station;
     }
 
-    public String getKind() {
+    public SurchargeKind getKind() {
         return kind;
     }
 
@@ -54,7 +70,7 @@ public class Surcharge {
         return number;
     }
 
-    public int getAccount() {
+    public Account getAccount() {
         return account;
     }
 
@@ -74,11 +90,11 @@ public class Surcharge {
         return status;
     }
 
-    public void setKind(String kind) {
+    public void setKind(SurchargeKind kind) {
         this.kind = kind;
     }
 
-    public void setAccount(int account) {
+    public void setAccount(Account account) {
         this.account = account;
     }
 
@@ -87,25 +103,37 @@ public class Surcharge {
         return this.sum.subtract(payed);
     }
 
+    private boolean isPaid(){
+        double threshold = 0.00001;
+        return ((this.status == SurchargeStatus.PAID)||
+                (this.getUnpaidSum().compareTo(BigDecimal.valueOf(threshold))<0));
+    }
+
     private boolean canBePaid(double sum){
        return ((this.status == SurchargeStatus.IN_ACTION)&&
                (this.getUnpaidSum().compareTo(BigDecimal.valueOf(sum)))>=0);
     }
 
+
+
     public void addPayment(LocalDate date, double sum, String documentKind, int documentNumber) {
         if (canBePaid(sum)) {
             this.payments.addPayment(date, sum, documentKind, documentNumber);
+            if (isPaid()){
+                this.setStatus(SurchargeStatus.PAID);
+            }
         }
     }
 
     public void setDenial(Denial denial) {
-        if (this.status == SurchargeStatus.IN_ACTION)
-        this.denial = denial;
+        if (this.status == SurchargeStatus.IN_ACTION) {
+            this.denial = denial;
+            this.setStatus(SurchargeStatus.REFUSED);
+        }
     }
 
     public void setDenial(LocalDate date, String denialKind) {
-        if (this.status == SurchargeStatus.IN_ACTION)
-            this.denial = new Denial(date, denialKind);
+        this.setDenial(new Denial(date, denialKind));
     }
 
     public void setComment(String comment) {
@@ -119,7 +147,7 @@ public class Surcharge {
 
     public enum SurchargeStatus {
         IN_ACTION,
-        PAYED,
+        PAID,
         REFUSED;
     }
 }

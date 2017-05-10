@@ -5,7 +5,7 @@ import com.surcharges.service.IdGenerator;
 import java.time.LocalDate;
 
 /**
- * Created by Dreamer on 08.05.2017.
+ * Отказ от начета
  */
 public class Denial {
     private String id;

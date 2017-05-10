@@ -5,9 +5,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-/**
- * Created by mtzadmin on 10.05.2017.
- */
 public class ShortNsiServiceImpl implements ShortNsiService{
     private Map<ShortNsiKind, List<String>> nsi;
 

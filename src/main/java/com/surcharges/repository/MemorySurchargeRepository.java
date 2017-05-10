@@ -4,9 +4,6 @@ import com.surcharges.model.Surcharge;
 
 import java.util.Map;
 
-/**
- * Created by Dreamer on 08.05.2017.
- */
 public class MemorySurchargeRepository implements SurchargeRepository {
     Map<String, Surcharge> surcharges;
 
