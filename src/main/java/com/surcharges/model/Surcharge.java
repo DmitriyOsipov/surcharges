@@ -2,8 +2,6 @@ package com.surcharges.model;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Created by Dreamer on 08.05.2017.
@@ -17,7 +15,7 @@ public class Surcharge {
     private int account;
     private BigDecimal sum;
     private PaymentsList payments;
-    private Refusing refusing;
+    private Denial denial;
     private String comment;
     private String period;
     private SurchargeStatus status;
@@ -60,8 +58,8 @@ public class Surcharge {
         return account;
     }
 
-    public Refusing getRefusing() {
-        return refusing;
+    public Denial getDenial() {
+        return denial;
     }
 
     public String getComment() {
@@ -84,21 +82,30 @@ public class Surcharge {
         this.account = account;
     }
 
-    private BigDecimal getUnpayedSum(){
+    private BigDecimal getUnpaidSum(){
         BigDecimal payed = payments.getTotal();
         return this.sum.subtract(payed);
     }
 
-    public void addPayment(LocalDate date, double sum) {
-        if ((this.status == SurchargeStatus.IN_ACTION)&&
-                (this.getUnpayedSum().compareTo(BigDecimal.valueOf(sum)))>=0) {
-            this.payments.addPayment(date, sum);
+    private boolean canBePaid(double sum){
+       return ((this.status == SurchargeStatus.IN_ACTION)&&
+               (this.getUnpaidSum().compareTo(BigDecimal.valueOf(sum)))>=0);
+    }
+
+    public void addPayment(LocalDate date, double sum, String documentKind, int documentNumber) {
+        if (canBePaid(sum)) {
+            this.payments.addPayment(date, sum, documentKind, documentNumber);
         }
     }
 
-    public void setRefusing(Refusing refusing) {
+    public void setDenial(Denial denial) {
         if (this.status == SurchargeStatus.IN_ACTION)
-        this.refusing = refusing;
+        this.denial = denial;
+    }
+
+    public void setDenial(LocalDate date, String denialKind) {
+        if (this.status == SurchargeStatus.IN_ACTION)
+            this.denial = new Denial(date, denialKind);
     }
 
     public void setComment(String comment) {
